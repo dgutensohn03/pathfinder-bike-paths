@@ -1,21 +1,26 @@
-# Pathfinder — Colorado bike path explorer demo
+# Pathfinder — Front Range bike paths
 
-A screenshot-ready product exploration: search four South Suburban bike paths, select one from the list or map, view published trail statistics and concept imagery, and optionally sort nearby paths using browser location.
+A static, screenshot-ready product exploration for finding a bicycle path that fits a ride. [Open the live demo](https://dgutensohn03.github.io/pathfinder-bike-paths/).
 
-## Run
+## The rider's question
 
-Serve this directory with any static HTTP server. For example: `python3 -m http.server 8000`. Open `http://localhost:8000`.
+“Where could I ride today?” Pathfinder lets someone search 30 named off-street paths, narrow by mapped length and surface, sort relative to a selected place or their approximate device location, inspect mapped segments, and open the area map. The path profile explains why it may fit and shows what the data can and cannot tell them.
 
-The page can be hosted directly from a GitHub Pages branch with `index.html` at the repository root. No build or API keys are required.
+## Data and image choices
 
-## Data provenance and limits
+- The checked-in [snapshot](data/trails.json) is generated from the [Denver Regional Council of Governments bicycle facilities layer](https://services.arcgis.com/rD2ylXRs80UroD90/ArcGIS/rest/services/DRCOG_Corridors_Data_Compilation_for_Analysis_WFL1/FeatureServer/102). The [import script](scripts/import_trails.py) selects 30 named paths, existing off-street shared-use and unpaved segments, in a fixed Front Range study area. It paginates the service and simplifies coordinates for this preview. To refresh: `python scripts/import_trails.py`; review the generated diff before committing.
+- “Mapped mi” is the sum of selected segment lengths within the study area. Branches, parallel facilities, overlap, and gaps may be present. It is **not** a continuous ride distance, route recommendation, elevation profile, or current condition. The center pin is an approximate map center, not a trailhead. Place and device sorting use great-circle distance to these centers.
+- The Cherry Creek Trail photograph depicts that actual trail near Champa Street and Speer Boulevard in Denver. [Photo by Raysonho, CC0](https://commons.wikimedia.org/wiki/File:CherryCreekTrail.jpg). Other paths use an abstract illustration instead of an unverified trail photo. The 960 px photo is served by Wikimedia Commons.
+- Base map © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright). Leaflet is loaded from unpkg. The mapped lines are served from this repository, so no trail API call is needed when a visitor selects a path.
 
-- Trail length and endpoint elevation difference come from [South Suburban Parks & Recreation](https://www.ssprd.org/Parks-Trails/Trails/Trail-Map). Its published lengths describe the trails in its district, not necessarily an entire regional route. Endpoint difference is not total ascent.
-- The selected path requests mapped line segments from [Colorado Parks & Wildlife's COTREX feature service](https://services5.arcgis.com/ttNGmDvKQA7oeDQ3/arcgis/rest/services/COTREX_Trails_Populated_2026/FeatureServer/54) in the visitor's browser. The app shows a linked fallback when geometry cannot load. That data service says responsibility for accuracy rests with its sources; the layer description lists the trail-data update as November 25, 2024.
-- OpenStreetMap provides the base tiles and attribution. Images are AI-generated atmosphere studies, visibly labeled in the interface; they do not depict the named trails.
-- Marker coordinates are representative map points, not verified trail entrances. “Near me” sorts by proximity to those representative points and does not provide routing or safety guidance.
-- No live closure, weather, surface, navigation, or accessibility claims are made. Official source links should be checked before a ride.
+## Run locally
 
-## Learn article angle
+```sh
+python -m http.server 8000
+```
 
-The interface connects browse state, a map selection, and a detailed path profile. The case study can examine the difference between a trail *line* and a usable trail *entrance*, the provenance of displayed statistics, permission-based geolocation, handling missing geometry, and why a candid prototype is stronger than invented live data.
+Open http://localhost:8000. Geolocation requires browser permission and a secure context when hosted. The site is plain HTML/CSS/JS and deploys from the repository root to GitHub Pages.
+
+## Scope and next steps
+
+This is a regional discovery prototype, not navigation. A production version would add reviewed trailhead access points, managing-agency condition feeds and closures, a stronger search index, moderation for user photos, and measured usability outcomes. Refreshes are deliberate so changes to the source schema or route identities can be reviewed.

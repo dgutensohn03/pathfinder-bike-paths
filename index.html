@@ -1,42 +1,26 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#17332e">
-  <meta name="description" content="Explore Colorado bike paths on a map, compare trail details, and find a ride near you.">
-  <title>Pathfinder — Find your next ride</title>
-  <link rel="preconnect" href="https://unpkg.com">
-  <link rel="stylesheet" href="./leaflet.css">
-  <link rel="stylesheet" href="./styles.css">
-  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script defer src="./app.js"></script>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17332e"><meta name="description" content="Find an off-street Front Range bike path using real regional data, mapped segments, surface information, and approximate location sorting.">
+  <title>Pathfinder — Find a ride that fits</title>
+  <link rel="preconnect" href="https://unpkg.com"><link rel="preconnect" href="https://tile.openstreetmap.org">
+  <link rel="stylesheet" href="./leaflet.css"><link rel="stylesheet" href="./styles.css">
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script><script defer src="./app.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#results">Skip to trails</a>
-  <header class="site-header">
-    <div class="brand" aria-label="Pathfinder"><span class="brand-mark" aria-hidden="true">P<span>↗</span></span><span>pathfinder<span class="brand-period">.</span></span></div>
-    <span class="header-divider" aria-hidden="true"></span>
-    <span class="header-subtitle">The ride starts here</span>
-    <span class="header-region"><span class="region-dot"></span> COLORADO · FRONT RANGE</span>
-  </header>
+  <a class="skip-link" href="#results">Skip to paths</a>
+  <header class="site-header"><div class="brand" aria-label="Pathfinder"><span class="brand-mark" aria-hidden="true">P<span>↗</span></span><span>pathfinder<span class="brand-period">.</span></span></div><span class="header-divider" aria-hidden="true"></span><span class="header-subtitle">Find a ride that fits.</span><span class="header-region"><span class="region-dot"></span> COLORADO · FRONT RANGE</span></header>
   <main class="app-shell">
     <section class="browse-panel" aria-labelledby="browse-title">
-      <div class="browse-intro"><div class="eyebrow">RIDE LIBRARY <span>01 / 04</span></div><h1 id="browse-title">Find your<br><em>next ride.</em></h1><p>Explore paths by place, distance, and the kind of day you want to have.</p></div>
-      <form class="search-form" role="search" id="search-form"><label for="trail-search">Search trails or places</label><div class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5"/><path d="m16 16 4.4 4.4"/></svg><input id="trail-search" autocomplete="off" placeholder="Try Mary Carter or Littleton"></div></form>
-      <div class="browse-controls"><button type="button" class="location-button" id="near-me"><span aria-hidden="true">◎</span> Use my location</button><div class="filter-row" role="group" aria-label="Trail length"><button data-filter="all" aria-pressed="true">All rides</button><button data-filter="short" aria-pressed="false">Under 5 mi</button><button data-filter="long" aria-pressed="false">5+ mi</button></div></div>
-      <div class="list-heading"><h2 id="results">Explore paths</h2><span id="result-count" aria-live="polite">4 trails</span></div>
-      <div id="trail-list" class="trail-list" role="list"></div>
-      <p class="browse-footer">A focused demo of four South Suburban trails. <a href="https://www.ssprd.org/Parks-Trails/Trails/Trail-Map" target="_blank" rel="noopener">View official trail information ↗</a></p>
+      <div class="browse-intro"><div class="eyebrow">PATH DISCOVERY <span id="catalog-count">LOADING PATHS…</span></div><h1 id="browse-title">Find your<br><em>way out.</em></h1><p>Real paths. Useful details. A simpler way to find where to ride next.</p></div>
+      <form class="search-form" role="search" id="search-form"><label for="trail-search">Find a path by name</label><div class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5"/><path d="m16 16 4.4 4.4"/></svg><input id="trail-search" type="search" autocomplete="off" placeholder="Try Cherry Creek or High Line"></div></form>
+      <div class="browse-controls"><div class="place-row"><label for="place-filter">Explore near</label><select id="place-filter"><option value="">All areas</option><option value="denver">Denver</option><option value="littleton">Littleton</option><option value="boulder">Boulder</option><option value="aurora">Aurora</option><option value="parker">Parker</option><option value="golden">Golden</option></select></div><button type="button" class="location-button" id="near-me">◎ &nbsp;Sort near my location</button><p id="location-status" class="location-status" role="status"></p><div class="control-label">MAPPED LENGTH</div><div class="filter-row" role="group" aria-label="Mapped segment length"><button data-filter="all" aria-pressed="true">Any</button><button data-filter="short" aria-pressed="false">Under 5 mi</button><button data-filter="medium" aria-pressed="false">5–15 mi</button><button data-filter="long" aria-pressed="false">15+ mi</button></div><div class="place-row surface-row"><label for="surface-filter">Surface</label><select id="surface-filter"><option value="all">Any surface</option><option value="paved">Mostly paved</option><option value="mixed">Mixed</option><option value="unpaved">Mostly unpaved</option></select></div></div>
+      <div class="list-heading"><h2 id="results">Explore paths</h2><span id="result-count" aria-live="polite">Loading…</span></div><div id="trail-list" class="trail-list" role="list"></div>
+      <p class="browse-footer">A selected set of mapped off-street paths. Lengths describe mapped segments, not a planned ride. <a href="https://services.arcgis.com/rD2ylXRs80UroD90/ArcGIS/rest/services/DRCOG_Corridors_Data_Compilation_for_Analysis_WFL1/FeatureServer/102" target="_blank" rel="noopener">Explore the DRCOG source ↗</a></p>
     </section>
-    <section class="map-panel" aria-label="Interactive trail map">
-      <div id="map" class="map-canvas" role="application" aria-label="Map of bicycle trails near Littleton"></div>
-      <div class="map-overlay top"><div class="map-eyebrow">EXPLORE BY MAP</div><div class="map-title">Littleton &amp; beyond</div></div>
-      <div class="map-overlay bottom" id="map-status" role="status">Select a path to explore its route</div>
-      <button id="recenter" class="recenter" type="button" aria-label="Return map to Littleton">⌖</button>
-    </section>
-    <aside class="detail-panel" id="detail-panel" aria-label="Selected trail details"></aside>
-  </main>
-  <footer class="site-footer"><span>PATHFINDER / A PRODUCT EXPLORATION</span><span>Trail details are for discovery. Check the manager’s current notices before riding.</span></footer>
+    <section class="map-panel" aria-label="Interactive path map"><div id="map" class="map-canvas" role="application" aria-label="Map of Front Range bicycle paths"></div><div class="map-overlay top"><div class="map-eyebrow">PATH NETWORK / FRONT RANGE</div><div class="map-title">See where it takes you.</div></div><div class="map-overlay bottom" id="map-status" role="status">Loading mapped paths…</div><button id="recenter" class="recenter" type="button" aria-label="Fit selected path on map">⌖</button></section>
+    <aside class="detail-panel" id="detail-panel" aria-label="Selected path details"></aside>
+  </main><footer class="site-footer"><span>PATHFINDER / A PRODUCT EXPLORATION</span><span id="snapshot-date">Regional facility data</span><span>Check local notices before riding.</span></footer>
 </body>
 </html>
