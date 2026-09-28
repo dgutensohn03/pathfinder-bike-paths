@@ -29,6 +29,7 @@ test('selection opens a factual profile and keeps the map in sync', async ({ pag
 
   if (testInfo.project.name !== 'desktop') {
     await expect(page.locator('#selected-trail-title')).toBeInViewport();
+    await expect.poll(() => page.locator('#detail-panel').evaluate(el => Math.round(el.getBoundingClientRect().top))).toBeLessThan(40);
     if (testInfo.project.name === 'phone') {
       await testInfo.attach('selected-path-phone', { body: await page.screenshot(), contentType: 'image/png' });
     }

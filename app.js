@@ -70,7 +70,7 @@ function showRoute(animate=true){
  const bounds=routeLayer.getBounds();if(bounds.isValid())map.fitBounds(bounds.pad(.14),{maxZoom:12,animate});
  $("map-status").innerHTML=`<strong>${esc(selected.name)}</strong><span>${selected.miles} mi mapped · ${esc(selected.surface)} · DRCOG segments</span>`;
 }
-function selectTrail(id){const t=trails.find(x=>x.id===id);if(!t)return;selected=t;history.replaceState(null,"",`?trail=${encodeURIComponent(id)}`);renderList();renderDetail();showRoute();if(matchMedia("(max-width:700px)").matches){$("selected-trail-title").focus({preventScroll:true});$("detail-panel").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"start"})}}
+function selectTrail(id){const t=trails.find(x=>x.id===id);if(!t)return;selected=t;history.replaceState(null,"",`?trail=${encodeURIComponent(id)}`);renderList();renderDetail();showRoute();if(matchMedia("(max-width:700px)").matches){$("selected-trail-title").focus({preventScroll:true});$("detail-panel").scrollIntoView({behavior:"auto",block:"start"})}}
 function resetFilters(){query="";lengthFilter="all";surfaceFilter="all";photosOnly=false;$("trail-search").value="";$("surface-filter").value="all";$("photo-filter").setAttribute("aria-pressed","false");document.querySelectorAll("[data-filter]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.filter==="all")));renderList()}
 $("search-form").addEventListener("submit",e=>{e.preventDefault();$("results").scrollIntoView({behavior:"smooth",block:"nearest"})});
 $("trail-search").addEventListener("input",e=>{query=e.target.value.toLowerCase().trim();renderList()});

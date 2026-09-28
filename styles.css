@@ -130,7 +130,7 @@ body{background:var(--paper)}
 .search-submit{background:var(--forest)}.search-submit:hover{background:var(--forest2)}
 .mobile-map-link{display:none}
 @media(max-width:700px){
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:auto}
   .app-shell{display:block}
   .browse-panel{max-height:none}
   .detail-panel{display:block}
