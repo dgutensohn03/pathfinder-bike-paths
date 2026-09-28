@@ -12,7 +12,7 @@ const photo={
  "waterton-canyon-trail":[{src:commons("Waterton Canyon Trail 825.jpg"),alt:"Deer along the Waterton Canyon segment of the Colorado Trail",place:"Wildlife in Waterton Canyon",credit:"Chris Light · CC BY-SA 4.0 · display cropped",url:"https://commons.wikimedia.org/wiki/File:Waterton_Canyon_Trail_825.jpg",license:"https://creativecommons.org/licenses/by-sa/4.0/"}]
 };
 let trails=[],snapshot=null,selected=null,map=null,routeLayer=null,markerLayer=null,userMarker=null;
-let query="",lengthFilter="all",surfaceFilter="all",sortPoint=null,sortLabel="";
+let query="",lengthFilter="all",surfaceFilter="all",photosOnly=false,sortPoint=null,sortLabel="";
 const markers=new Map();
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const uiIcon=kind=>{
@@ -24,13 +24,13 @@ function nearestMappedKm(point){let nearest=Infinity;for(const trail of trails)f
 function clearUserMarker(){if(map&&userMarker){map.removeLayer(userMarker);userMarker=null}}
 function useDemoLocation(){clearUserMarker();sortPoint=places.denver;sortLabel="Denver";$("place-filter").value="denver";$("location-status").textContent="Showing Colorado paths near Denver as an example.";renderList()}
 function locationFallback(message){sortPoint=null;sortLabel="";clearUserMarker();$("place-filter").value="";$("location-status").innerHTML=`${message} <button type="button" class="demo-location" id="demo-location">Explore near Denver ↗</button>`;$("demo-location").addEventListener("click",useDemoLocation);renderList()}
-function filtered(){let list=trails.filter(t=>t.name.toLowerCase().includes(query)&&(lengthFilter==="all"||lengthFilter==="short"&&t.miles<5||lengthFilter==="medium"&&t.miles>=5&&t.miles<15||lengthFilter==="long"&&t.miles>=15)&&(surfaceFilter==="all"||t.surface.toLowerCase()===surfaceFilter));return sortPoint?list.sort((a,b)=>distanceKm(sortPoint,a.point)-distanceKm(sortPoint,b.point)):list}
+function filtered(){let list=trails.filter(t=>t.name.toLowerCase().includes(query)&&(lengthFilter==="all"||lengthFilter==="short"&&t.miles<5||lengthFilter==="medium"&&t.miles>=5&&t.miles<15||lengthFilter==="long"&&t.miles>=15)&&(surfaceFilter==="all"||t.surface.toLowerCase()===surfaceFilter)&&(!photosOnly||Boolean(photo[t.id])));return sortPoint?list.sort((a,b)=>distanceKm(sortPoint,a.point)-distanceKm(sortPoint,b.point)):list}
 function why(t){if(sortPoint)return `Mapped center ~${Math.round(distanceKm(sortPoint,t.point)*.621371)} mi from ${sortLabel}`;if(t.miles<5)return "A compact mapped network for a flexible ride";if(t.miles>=15)return "An extensive path network to explore";return "Room to choose your own out-and-back distance"}
 function renderList(){
  const list=filtered();
  if(list.length&&selected&&!list.includes(selected)){selected=list[0];history.replaceState(null,"",`?trail=${encodeURIComponent(selected.id)}`);renderDetail();showRoute()}
  $("result-count").textContent=`${list.length} of ${trails.length} paths`;
- $("trail-list").innerHTML=list.length?list.map(t=>`<div role="listitem"><button class="trail-card ${selected?.id===t.id?"active":""}" type="button" data-trail="${esc(t.id)}" aria-pressed="${selected?.id===t.id}"><span class="trail-thumb ${photo[t.id]?"has-photo":""}">${photo[t.id]?`<img src="${photo[t.id][0].src}" alt="" loading="lazy">`:uiIcon("route")}</span><span class="card-copy"><strong>${esc(t.name)}</strong><small>${esc(why(t))}</small><span class="card-facts"><b>${t.miles} mi mapped</b><span>${esc(t.surface)}</span></span></span></button></div>`).join(""):'<div class="list-empty"><strong>No paths match those filters.</strong><p>Try another name, surface, or mapped length.</p><button type="button" id="clear-filters">Clear filters</button></div>';
+ $("trail-list").innerHTML=list.length?list.map((t,i)=>`<div role="listitem"><button class="trail-card ${selected?.id===t.id?"active":""}" type="button" data-trail="${esc(t.id)}" aria-pressed="${selected?.id===t.id}"><span class="trail-thumb ${photo[t.id]?"has-photo":""}">${photo[t.id]?`<img src="${photo[t.id][0].src}" alt="" loading="lazy">`:uiIcon("route")}</span><span class="card-copy"><span class="card-index">${i+1} · BIKE PATH${photo[t.id]?" · PHOTOS AVAILABLE":""}</span><strong>${esc(t.name)}</strong><span class="card-facts"><b>${t.miles} mapped mi</b><span>${esc(t.surface)} surface</span></span><small>${esc(why(t))}</small></span><span class="card-chevron" aria-hidden="true">›</span></button></div>`).join(""):'<div class="list-empty"><strong>No paths match those filters.</strong><p>Try another name, surface, or mapped length.</p><button type="button" id="clear-filters">Clear filters</button></div>';
  document.querySelectorAll("[data-trail]").forEach(b=>b.addEventListener("click",()=>selectTrail(b.dataset.trail)));
  $("clear-filters")?.addEventListener("click",resetFilters);
  if(map)markers.forEach((m,id)=>m.setOpacity(list.some(t=>t.id===id)?1:.18));
@@ -66,10 +66,12 @@ function showRoute(animate=true){
  $("map-status").innerHTML=`<strong>${esc(selected.name)}</strong><span>${selected.miles} mi mapped · ${esc(selected.surface)} · DRCOG segments</span>`;
 }
 function selectTrail(id){const t=trails.find(x=>x.id===id);if(!t)return;selected=t;history.replaceState(null,"",`?trail=${encodeURIComponent(id)}`);renderList();renderDetail();showRoute();if(innerWidth<651)document.querySelector(".map-panel").scrollIntoView({behavior:"smooth",block:"start"})}
-function resetFilters(){query="";lengthFilter="all";surfaceFilter="all";$("trail-search").value="";$("surface-filter").value="all";document.querySelectorAll("[data-filter]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.filter==="all")));renderList()}
-$("search-form").addEventListener("submit",e=>e.preventDefault());
+function resetFilters(){query="";lengthFilter="all";surfaceFilter="all";photosOnly=false;$("trail-search").value="";$("surface-filter").value="all";$("photo-filter").setAttribute("aria-pressed","false");document.querySelectorAll("[data-filter]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.filter==="all")));renderList()}
+$("search-form").addEventListener("submit",e=>{e.preventDefault();$("results").scrollIntoView({behavior:"smooth",block:"nearest"})});
 $("trail-search").addEventListener("input",e=>{query=e.target.value.toLowerCase().trim();renderList()});
 $("surface-filter").addEventListener("change",e=>{surfaceFilter=e.target.value;renderList()});
+$("photo-filter").addEventListener("click",e=>{photosOnly=e.currentTarget.getAttribute("aria-pressed")!=="true";e.currentTarget.setAttribute("aria-pressed",String(photosOnly));renderList()});
+$("reset-all").addEventListener("click",resetFilters);
 $("place-filter").addEventListener("change",e=>{clearUserMarker();sortPoint=places[e.target.value]||null;sortLabel=e.target.selectedOptions[0].textContent;$("location-status").textContent=sortPoint?`Showing Colorado paths near ${sortLabel}.`:"";renderList()});
 document.querySelectorAll("[data-filter]").forEach(btn=>btn.addEventListener("click",()=>{lengthFilter=btn.dataset.filter;document.querySelectorAll("[data-filter]").forEach(b=>b.setAttribute("aria-pressed",String(b===btn)));renderList()}));
 $("near-me").addEventListener("click",()=>{
