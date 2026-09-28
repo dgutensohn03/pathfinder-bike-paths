@@ -131,6 +131,9 @@ body{background:var(--paper)}
 .mobile-map-link{display:none}
 @media(max-width:700px){
   html{scroll-behavior:smooth}
+  .app-shell{display:block}
+  .browse-panel{max-height:none}
+  .detail-panel{display:block}
   .site-header{padding:10px 16px 12px}
   .search-form{height:50px}
   .search-form input,.search-form select{font-size:16px}
@@ -150,7 +153,8 @@ body{background:var(--paper)}
   .trail-thumb{width:76px;height:76px}
   .card-copy strong{font-size:.86rem}
   .browse-footer{margin:13px 20px 17px}
-  .map-panel{height:320px;scroll-margin-top:8px}
+  .map-panel{height:320px;min-height:0}
+  .map-canvas{scroll-margin-top:8px}
   .map-overlay.top{display:none}
   .map-overlay.bottom{left:12px;bottom:12px;max-width:calc(100% - 75px);min-width:0;padding:8px 10px}
   .leaflet-control-zoom{display:none}
@@ -160,5 +164,6 @@ body{background:var(--paper)}
   .photo-grid.multi{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding-bottom:5px}
   .photo-grid.multi figure{flex:0 0 82%;scroll-snap-align:start}
   .photo-grid img{height:205px}
+  .site-footer{display:block}
 }
-@media(max-width:380px){.header-near{width:37%}.search-submit{min-width:44px;padding:0 8px}.filter-secondary{flex-wrap:wrap}.filter-secondary label{width:100%}}
+@media(max-width:380px){.header-near{width:37%}.search-submit{min-width:44px;padding:0 8px}.filter-secondary{flex-wrap:wrap}.filter-secondary label{width:100%}.list-heading{flex-wrap:wrap}}
