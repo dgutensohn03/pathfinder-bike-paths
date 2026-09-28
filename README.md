@@ -15,7 +15,7 @@ A static, screenshot-ready product exploration for finding a bicycle path that f
 
 ## Discovery design rationale
 
-The interface borrows useful conventions from current local discovery products, including Yelp's Find/Near search, scannable filters, photo-forward results, and a detailed selected place alongside a map. Pathfinder applies those patterns to a different question: which mapped bike path might suit a ride? Results show mapped length and surface instead of invented ratings or reviews. A “With photos” filter limits the list to paths with location-specific, credited imagery. Selection keeps the result, map highlight, and path profile in sync. On phones, results have a bounded vertical scroll area, an explicit map shortcut, and a compact map followed immediately by the selected path facts and swipeable photos. The warm neutral palette and route-mark logo are Pathfinder's own visual identity; the prototype has no Yelp affiliation.
+The interface borrows useful conventions from current local discovery products, including Yelp's Find/Near search, scannable filters, photo-forward results, and a detailed selected place alongside a map. Pathfinder applies those patterns to a different question: which mapped bike path might suit a ride? Results show mapped length and surface instead of invented ratings or reviews. A “With photos” filter limits the list to paths with location-specific, credited imagery. Selection keeps the result, map highlight, and path profile in sync. On phones, results have a bounded vertical scroll area. Selecting a result opens its profile and puts mapped facts and photos first; explicit links take the visitor back to results or over to the map. The warm neutral palette and route-mark logo are Pathfinder's own visual identity; the prototype has no Yelp affiliation.
 
 ## Run locally
 
@@ -24,6 +24,10 @@ python -m http.server 8000
 ```
 
 Open http://localhost:8000. Geolocation requires browser permission and a secure context when hosted. The site is plain HTML/CSS/JS and deploys from the repository root to GitHub Pages.
+
+## Browser checks
+
+Run `npm ci`, `npx playwright install chromium`, then `npm test`. The browser suite covers desktop, phone, and the 680 px layout boundary. It exercises real search and filter behavior, result-to-profile-to-map navigation, credited photos, horizontal overflow, and the outside-Colorado location fallback. GitHub Actions runs the same suite on every push and pull request, retaining a report and a phone screenshot attachment. These checks verify the prototype's behavior; they are not user research or evidence of improved rider outcomes.
 
 ## Scope and next steps
 

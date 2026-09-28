@@ -167,3 +167,13 @@ body{background:var(--paper)}
   .site-footer{display:block}
 }
 @media(max-width:380px){.header-near{width:37%}.search-submit{min-width:44px;padding:0 8px}.filter-secondary{flex-wrap:wrap}.filter-secondary label{width:100%}.list-heading{flex-wrap:wrap}}
+
+/* On small screens a selected result opens its profile; map exploration is explicit. */
+.profile-nav{display:none}
+@media(max-width:700px){
+  .detail-panel{scroll-margin-top:8px}
+  .profile-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:13px 0 3px}
+  .profile-nav a{font-size:.72rem;font-weight:800;color:#286b4c;text-decoration:none}
+  .profile-nav a:hover,.profile-nav a:focus-visible{text-decoration:underline;text-underline-offset:3px}
+  .profile-head h2{margin-top:13px}
+}
