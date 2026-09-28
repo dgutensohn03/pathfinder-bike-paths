@@ -1,11 +1,24 @@
 const $=id=>document.getElementById(id);
 const sourceURL="https://services.arcgis.com/rD2ylXRs80UroD90/ArcGIS/rest/services/DRCOG_Corridors_Data_Compilation_for_Analysis_WFL1/FeatureServer/102";
 const places={denver:[39.739,-104.99],littleton:[39.613,-105.017],boulder:[40.015,-105.27],aurora:[39.73,-104.832],parker:[39.519,-104.762],golden:[39.756,-105.222]};
-const photo={"cherry-creek-trail":{src:"https://commons.wikimedia.org/wiki/Special:FilePath/CherryCreekTrail.jpg?width=960",alt:"Cherry Creek Trail near Champa Street and Speer Boulevard in Denver",credit:"Raysonho · CC0",url:"https://commons.wikimedia.org/wiki/File:CherryCreekTrail.jpg"}};
+const commons=name=>`https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(name)}?width=960`;
+const photo={
+ "cherry-creek-trail":[
+  {src:commons("CherryCreekTrail.jpg"),alt:"Cherry Creek Trail at Champa Street and Speer Boulevard, Denver",place:"Champa & Speer, Denver",credit:"Raysonho · CC0",url:"https://commons.wikimedia.org/wiki/File:CherryCreekTrail.jpg"},
+  {src:commons("CherryCreekTrail2.jpg"),alt:"Cherry Creek Trail near Speer Boulevard and West Colfax Avenue, Denver",place:"Speer & Colfax, Denver",credit:"Raysonho · CC0",url:"https://commons.wikimedia.org/wiki/File:CherryCreekTrail2.jpg"}],
+ "clear-creek-trail":[{src:commons("GoldenCO ClearCreekPath Oct2014.jpg"),alt:"Path beside Clear Creek in Golden, Colorado",place:"Clear Creek in Golden",credit:"Amy Aletheia Cahill · CC BY-SA 2.0 · display cropped",url:"https://commons.wikimedia.org/wiki/File:GoldenCO_ClearCreekPath_Oct2014.jpg",license:"https://creativecommons.org/licenses/by-sa/2.0/"}],
+ "highline-canal-trail":[{src:commons("Marker 3174.jpg"),alt:"High Line Canal Trail mile marker 68 in Denver",place:"Mile 68, Green Valley Ranch",credit:"Nolabob · CC0",url:"https://commons.wikimedia.org/wiki/File:Marker_3174.jpg"}],
+ "south-platte-river-trail":[{src:commons("ValverdeDenver.JPG"),alt:"View from a bicycle path bridge over the South Platte River in Denver",place:"Bridge over the South Platte, Denver",credit:"Jeffrey Beall · CC BY-SA 3.0 · display cropped",url:"https://commons.wikimedia.org/wiki/File:ValverdeDenver.JPG",license:"https://creativecommons.org/licenses/by-sa/3.0/"}],
+ "waterton-canyon-trail":[{src:commons("Waterton Canyon Trail 825.jpg"),alt:"Deer along the Waterton Canyon segment of the Colorado Trail",place:"Wildlife in Waterton Canyon",credit:"Chris Light · CC BY-SA 4.0 · display cropped",url:"https://commons.wikimedia.org/wiki/File:Waterton_Canyon_Trail_825.jpg",license:"https://creativecommons.org/licenses/by-sa/4.0/"}]
+};
 let trails=[],snapshot=null,selected=null,map=null,routeLayer=null,markerLayer=null,userMarker=null;
 let query="",lengthFilter="all",surfaceFilter="all",sortPoint=null,sortLabel="";
 const markers=new Map();
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uiIcon=kind=>{
+ const paths={route:'<path d="M5 19c4-7 8-3 10-9 1-2 2-3 4-4"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="6" r="2"/>',distance:'<path d="M3 8v8M21 8v8M3 12h18M8 9l-2 3 2 3M16 9l2 3-2 3"/>',surface:'<path d="M3 17c5-7 9 1 18-7M4 21c5-7 10 1 17-7"/><circle cx="7" cy="8" r="2"/>',segments:'<path d="m3 17 5-6 4 3 8-9M3 20h5M15 20h6"/><circle cx="8" cy="11" r="1"/>',map:'<path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2zM9 3v16M15 5v16"/>',external:'<path d="M12 5h7v7M19 5l-9 9M18 15v4H5V6h4"/>'};
+ return `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[kind]}</svg>`;
+};
 function distanceKm(a,b){const d1=(b[0]-a[0])*Math.PI/180,d2=(b[1]-a[1])*Math.PI/180,x=Math.sin(d1/2)**2+Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.sin(d2/2)**2;return 12742*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
 function nearestMappedKm(point){let nearest=Infinity;for(const trail of trails)for(const line of trail.geometry.coordinates)for(const [lon,lat] of line)nearest=Math.min(nearest,distanceKm(point,[lat,lon]));return nearest}
 function clearUserMarker(){if(map&&userMarker){map.removeLayer(userMarker);userMarker=null}}
@@ -17,20 +30,21 @@ function renderList(){
  const list=filtered();
  if(list.length&&selected&&!list.includes(selected)){selected=list[0];history.replaceState(null,"",`?trail=${encodeURIComponent(selected.id)}`);renderDetail();showRoute()}
  $("result-count").textContent=`${list.length} of ${trails.length} paths`;
- $("trail-list").innerHTML=list.length?list.map(t=>`<div role="listitem"><button class="trail-card ${selected?.id===t.id?"active":""}" type="button" data-trail="${esc(t.id)}" aria-pressed="${selected?.id===t.id}"><span class="trail-thumb ${photo[t.id]?"has-photo":""}">${photo[t.id]?`<img src="${photo[t.id].src}" alt="" loading="lazy">`:'<span aria-hidden="true">↗</span>'}</span><span class="card-copy"><strong>${esc(t.name)}</strong><small>${esc(why(t))}</small><span class="card-facts"><b>${t.miles} mi mapped</b><span>${esc(t.surface)}</span></span></span></button></div>`).join(""):'<div class="list-empty"><strong>No paths match those filters.</strong><p>Try another name, surface, or mapped length.</p><button type="button" id="clear-filters">Clear filters</button></div>';
+ $("trail-list").innerHTML=list.length?list.map(t=>`<div role="listitem"><button class="trail-card ${selected?.id===t.id?"active":""}" type="button" data-trail="${esc(t.id)}" aria-pressed="${selected?.id===t.id}"><span class="trail-thumb ${photo[t.id]?"has-photo":""}">${photo[t.id]?`<img src="${photo[t.id][0].src}" alt="" loading="lazy">`:uiIcon("route")}</span><span class="card-copy"><strong>${esc(t.name)}</strong><small>${esc(why(t))}</small><span class="card-facts"><b>${t.miles} mi mapped</b><span>${esc(t.surface)}</span></span></span></button></div>`).join(""):'<div class="list-empty"><strong>No paths match those filters.</strong><p>Try another name, surface, or mapped length.</p><button type="button" id="clear-filters">Clear filters</button></div>';
  document.querySelectorAll("[data-trail]").forEach(b=>b.addEventListener("click",()=>selectTrail(b.dataset.trail)));
  $("clear-filters")?.addEventListener("click",resetFilters);
  if(map)markers.forEach((m,id)=>m.setOpacity(list.some(t=>t.id===id)?1:.18));
 }
 function renderDetail(){
- const t=selected,p=photo[t.id],composition=Object.entries(t.surfaceMix).filter(([,m])=>m>0).map(([label,m])=>`${esc(label)} ${m} mi`).join(" · ");
- const image=p?`<div class="photo-wrap"><img class="detail-image" src="${p.src}" alt="${esc(p.alt)}"><span class="photo-badge">PHOTOGRAPHED ON THIS TRAIL</span><a class="photo-credit" href="${p.url}" target="_blank" rel="noopener">Photo: ${esc(p.credit)} ↗</a></div>`:`<div class="route-art" role="img" aria-label="Abstract line illustration; no trail photograph available"><span class="art-line one"></span><span class="art-line two"></span><span class="art-dot"></span><span class="art-label">FIELD NOTES / ${esc(t.name.toUpperCase())}</span></div>`;
- $("detail-panel").innerHTML=`${image}<div class="detail-content"><div class="detail-eyebrow"><i></i> PATH PROFILE <span>·</span> FRONT RANGE</div><h2>${esc(t.name)}</h2><p class="detail-area">Existing off-street bicycle facility · surface profile: ${esc(t.surface.toLowerCase())}</p>
- <div class="fit-box"><span class="section-label">WHY THIS MAY FIT</span><p>${esc(why(t))}. Browse its mapped segments to choose a starting point and the distance that works for you.</p></div>
- <div class="stats-grid"><div class="stat"><strong>${t.miles}</strong><span>MAPPED MI*</span></div><div class="stat"><strong>${esc(t.surface)}</strong><span>SURFACE MIX</span></div><div class="stat"><strong>${t.segmentCount}</strong><span>MAP SEGMENTS</span></div></div>
- <p class="stat-note">*Sum of mapped segments inside this study area. Branches, gaps, or overlapping segments may be included. This is not a route length or promised ride distance.</p>
+ const t=selected,p=photo[t.id]||[],composition=Object.entries(t.surfaceMix).filter(([,m])=>m>0).map(([label,m])=>`${esc(label)} ${m} mi`).join(" · ");
+ const media=p.length?`<div class="photo-grid ${p.length>1?"multi":""}">${p.map((item,i)=>`<figure><img src="${item.src}" alt="${esc(item.alt)}" loading="${i?"lazy":"eager"}"><figcaption><span>${esc(item.place)}</span><a href="${item.url}" target="_blank" rel="noopener">Photo: ${esc(item.credit)}</a>${item.license?` · <a href="${item.license}" target="_blank" rel="noopener">License</a>`:""}</figcaption></figure>`).join("")}</div>`:`<div class="photo-unavailable">${uiIcon("route")}<span>Verified trail photos are being sourced for this path.</span></div>`;
+ $("detail-panel").innerHTML=`<div class="detail-content"><header class="profile-head"><div class="detail-eyebrow"><i></i> PATH PROFILE <span>·</span> FRONT RANGE</div><h2>${esc(t.name)}</h2><p class="detail-area">Existing off-street bicycle facility · ${esc(t.surface.toLowerCase())} surface profile</p></header>
+ <div class="stats-grid"><div class="stat">${uiIcon("distance")}<strong>${t.miles}</strong><span>MAPPED MI*</span></div><div class="stat">${uiIcon("surface")}<strong>${esc(t.surface)}</strong><span>SURFACE MIX</span></div><div class="stat">${uiIcon("segments")}<strong>${t.segmentCount}</strong><span>MAP SEGMENTS</span></div></div>
+ <p class="stat-note">*Mapped segment total in this study area. It may include branches, gaps, or overlaps; it is not a continuous ride distance.</p>
+ <section class="photos-section"><div class="section-heading"><h3>On this path</h3><a href="#map" class="map-jump">${uiIcon("map")} View mapped route</a></div>${media}</section>
+ <div class="fit-box"><span class="section-label">WHY THIS MAY FIT</span><p>${esc(why(t))}. Choose a starting point and a distance that works for you.</p></div>
  <section class="detail-section"><h3>Know before you go</h3><p>DRCOG classifies these segments as existing off-street shared-use or unpaved paths. Surface mix in the mapped selection: ${composition}. Check the current path status with the local trail manager before riding.</p></section>
- <section class="detail-section"><h3>Explore this path</h3><p>The highlighted lines show mapped path segments, which may be disconnected. The map pin marks the approximate center of the mapped area, not a trailhead.</p><div class="detail-actions"><a class="detail-link" target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=${t.point[0]}&mlon=${t.point[1]}#map=13/${t.point[0]}/${t.point[1]}">Open area map ↗</a><button class="share-button" type="button" id="copy-link">Copy path link</button></div><p id="copy-status" class="copy-status" role="status"></p></section>
+ <section class="detail-section"><h3>Explore this path</h3><p>The highlighted lines may be disconnected. The map pin marks the approximate center of the mapped area, not a trailhead.</p><div class="detail-actions"><a class="detail-link" target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=${t.point[0]}&mlon=${t.point[1]}#map=13/${t.point[0]}/${t.point[1]}">${uiIcon("external")} Open area map</a><button class="share-button" type="button" id="copy-link">Copy path link</button></div><p id="copy-status" class="copy-status" role="status"></p></section>
  <section class="detail-section provenance"><h3>Data &amp; provenance</h3><p>Regional bicycle facility inventory by <a href="${sourceURL}" target="_blank" rel="noopener">Denver Regional Council of Governments ↗</a>. Snapshot ${esc(snapshot.updated)}. Selected named paths across the Denver metro and nearby Boulder corridor. No live conditions are included.</p></section></div>`;
  $("copy-link").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(location.href);$("copy-status").textContent="Link copied."}catch{$("copy-status").textContent="Copy the address from your browser."}});
 }
@@ -49,9 +63,9 @@ function showRoute(animate=true){
  markers.forEach((m,id)=>m.setIcon(icon(id===selected.id)));
  routeLayer=L.geoJSON(selected.geometry,{style:{color:"#26634e",weight:5,opacity:.92,lineCap:"round",lineJoin:"round"},interactive:false}).addTo(map);
  const bounds=routeLayer.getBounds();if(bounds.isValid())map.fitBounds(bounds.pad(.14),{maxZoom:12,animate});
- $("map-status").textContent=`${selected.name} · mapped segments from DRCOG`;
+ $("map-status").innerHTML=`<strong>${esc(selected.name)}</strong><span>${selected.miles} mi mapped · ${esc(selected.surface)} · DRCOG segments</span>`;
 }
-function selectTrail(id){const t=trails.find(x=>x.id===id);if(!t)return;selected=t;history.replaceState(null,"",`?trail=${encodeURIComponent(id)}`);renderList();renderDetail();showRoute();if(innerWidth<651)$("detail-panel").scrollIntoView({behavior:"smooth",block:"start"})}
+function selectTrail(id){const t=trails.find(x=>x.id===id);if(!t)return;selected=t;history.replaceState(null,"",`?trail=${encodeURIComponent(id)}`);renderList();renderDetail();showRoute();if(innerWidth<651)document.querySelector(".map-panel").scrollIntoView({behavior:"smooth",block:"start"})}
 function resetFilters(){query="";lengthFilter="all";surfaceFilter="all";$("trail-search").value="";$("surface-filter").value="all";document.querySelectorAll("[data-filter]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.filter==="all")));renderList()}
 $("search-form").addEventListener("submit",e=>e.preventDefault());
 $("trail-search").addEventListener("input",e=>{query=e.target.value.toLowerCase().trim();renderList()});
