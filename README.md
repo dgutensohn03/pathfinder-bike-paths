@@ -13,6 +13,10 @@ A static, screenshot-ready product exploration for finding a bicycle path that f
 - Selected path profiles place mapped stats ahead of an on-location photo gallery. Verified images currently cover Cherry Creek, Clear Creek in Golden, High Line Canal, the South Platte bridge in Valverde, and wildlife in Waterton Canyon. Each image links to its original Wikimedia Commons file and shows its photographer and license. The Cherry Creek photos are [Raysonho’s CC0 images](https://commons.wikimedia.org/wiki/File:CherryCreekTrail.jpg). CC BY-SA images link to their licenses and disclose display cropping. Paths without a verified image say so instead of showing a generic landscape. Responsive images are served by Wikimedia Commons at 960 px.
 - Base map © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright). Leaflet is loaded from unpkg. The mapped lines are served from this repository, so no trail API call is needed when a visitor selects a path.
 
+## Discovery design rationale
+
+The interface borrows useful conventions from current local discovery products, including Yelp's Find/Near search, scannable filters, photo-forward results, and a detailed selected place alongside a map. Pathfinder applies those patterns to a different question: which mapped bike path might suit a ride? Results show mapped length and surface instead of invented ratings or reviews. A “With photos” filter limits the list to paths with location-specific, credited imagery. Selection keeps the result, map highlight, and path profile in sync. The warm neutral palette, route-mark logo, and restrained coral action color are Pathfinder's own visual identity; the prototype has no Yelp affiliation.
+
 ## Run locally
 
 ```sh
