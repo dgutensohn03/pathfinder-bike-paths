@@ -20,6 +20,7 @@
 .location-button{height:37px;background:#f2f7f0}
 .location-status{font-size:.68rem;line-height:1.4;color:#617867;margin:7px 0 0}
 .location-status:empty{display:none}
+.demo-location{display:inline;border:0;background:none;color:#236e4e;text-decoration:underline;text-underline-offset:2px;font-weight:800;padding:3px 0}
 .control-label{font-size:.62rem;font-weight:800;letter-spacing:.12em;color:#769080;margin-top:17px}
 .filter-row{margin-top:7px;gap:5px}.filter-row button{padding:7px 8px}
 .trail-list{gap:3px;padding:0 12px 18px}

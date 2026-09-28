@@ -4,7 +4,7 @@ A static, screenshot-ready product exploration for finding a bicycle path that f
 
 ## The rider's question
 
-“Where could I ride today?” Pathfinder lets someone search 30 named off-street paths, narrow by mapped length and surface, sort relative to a selected place or their approximate device location, inspect mapped segments, and open the area map. The path profile explains why it may fit and shows what the data can and cannot tell them.
+“Where could I ride today?” Pathfinder lets someone search 30 named off-street paths, narrow by mapped length and surface, sort relative to a selected place or their approximate device location, inspect mapped segments, and open the area map. The path profile explains why it may fit and shows what the data can and cannot tell them. Visitors outside the Front Range still see the full catalog and can choose “Explore near Denver” instead of receiving irrelevant far-away proximity results.
 
 ## Data and image choices
 
