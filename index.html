@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17332e">
+  <meta name="description" content="Explore Colorado bike paths on a map, compare trail details, and find a ride near you.">
+  <title>Pathfinder — Find your next ride</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzxwkHW0Aevhzkb4tKxgEw0mGcI=" crossorigin="">
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#results">Skip to trails</a>
+  <header class="site-header">
+    <div class="brand" aria-label="Pathfinder"><span class="brand-mark" aria-hidden="true">P<span>↗</span></span><span>pathfinder<span class="brand-period">.</span></span></div>
+    <span class="header-divider" aria-hidden="true"></span>
+    <span class="header-subtitle">The ride starts here</span>
+    <span class="header-region"><span class="region-dot"></span> COLORADO · FRONT RANGE</span>
+  </header>
+  <main class="app-shell">
+    <section class="browse-panel" aria-labelledby="browse-title">
+      <div class="browse-intro"><div class="eyebrow">RIDE LIBRARY <span>01 / 04</span></div><h1 id="browse-title">Find your<br><em>next ride.</em></h1><p>Explore paths by place, distance, and the kind of day you want to have.</p></div>
+      <form class="search-form" role="search" id="search-form"><label for="trail-search">Search trails or places</label><div class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5"/><path d="m16 16 4.4 4.4"/></svg><input id="trail-search" autocomplete="off" placeholder="Try Mary Carter or Littleton"></div></form>
+      <div class="browse-controls"><button type="button" class="location-button" id="near-me"><span aria-hidden="true">◎</span> Use my location</button><div class="filter-row" role="group" aria-label="Trail length"><button data-filter="all" aria-pressed="true">All rides</button><button data-filter="short" aria-pressed="false">Under 5 mi</button><button data-filter="long" aria-pressed="false">5+ mi</button></div></div>
+      <div class="list-heading"><h2 id="results">Explore paths</h2><span id="result-count" aria-live="polite">4 trails</span></div>
+      <div id="trail-list" class="trail-list" role="list"></div>
+      <p class="browse-footer">A focused demo of four South Suburban trails. <a href="https://www.ssprd.org/Parks-Trails/Trails/Trail-Map" target="_blank" rel="noopener">View official trail information ↗</a></p>
+    </section>
+    <section class="map-panel" aria-label="Interactive trail map">
+      <div id="map" class="map-canvas" role="application" aria-label="Map of bicycle trails near Littleton"></div>
+      <div class="map-overlay top"><div class="map-eyebrow">EXPLORE BY MAP</div><div class="map-title">Littleton &amp; beyond</div></div>
+      <div class="map-overlay bottom" id="map-status" role="status">Select a path to explore its route</div>
+      <button id="recenter" class="recenter" type="button" aria-label="Return map to Littleton">⌖</button>
+    </section>
+    <aside class="detail-panel" id="detail-panel" aria-label="Selected trail details"></aside>
+  </main>
+  <footer class="site-footer"><span>PATHFINDER / A PRODUCT EXPLORATION</span><span>Trail details are for discovery. Check the manager’s current notices before riding.</span></footer>
+</body>
+</html>
